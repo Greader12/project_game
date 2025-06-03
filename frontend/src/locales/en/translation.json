@@ -1,0 +1,16 @@
+{
+        "welcome": "Welcome to the Project Simulator!",
+        "week": "Week",
+        "tasksCompleted": "Tasks completed",
+        "saveProgress": "Save progress",
+        "yourResources": "Your resources",
+        "yourBudget": "Your budget",
+        "yourStaff": "Your staff",
+        "projectTasks": "📝 Project Tasks",
+        "task": "Task",
+        "assignStaff": "Assign Staff",
+        "duration": "Duration",
+        "cost": "Cost",
+        "weeks": "weeks",
+        "selectStaff": "-- Select --"
+    }

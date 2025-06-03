@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.pyc
+instance/
+*.db
+flask_session/
+.env
+
+# Node
+node_modules/
+build/
+.env.local
+
+# Logs
+*.log
+
+# System files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+
+# NPM/Yarn Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
