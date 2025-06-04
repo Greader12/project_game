@@ -2,22 +2,28 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
+from config import Config
 import os
+from models import user, project, task, staff, assignment, event
 
 from models import db  # импортируем `db` из models
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
+jwt = JWTManager()  # <-- создаём JWTManager заранее
+
 def create_app():
     app = Flask(__name__)
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'instance', 'app.db')
-    app.config['SECRET_KEY'] = 'your-secret-key'
-    app.config['JWT_SECRET_KEY'] = 'your-jwt-secret-key'
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config.from_object(Config)
 
-    db.init_app(app)  # инициализируем тут, ПОСЛЕ создания app
+    db.init_app(app)
+    jwt.init_app(app)
 
-    jwt = JWTManager(app)
+    # 🔥 Вот ЭТО нужно добавить:
+    @jwt.user_identity_loader
+    def user_identity_lookup(identity):
+        return str(identity)  # принудительно преобразуем identity в строку
+
     migrate = Migrate(app, db)
 
     from routes.auth_routes import auth_bp
@@ -34,7 +40,7 @@ def create_app():
 
     return app
 
-app = create_app()  # создаём приложение тут!
+app = create_app()
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, host="0.0.0.0")

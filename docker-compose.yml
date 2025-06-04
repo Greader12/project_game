@@ -1,39 +1,46 @@
+
 services:
   backend:
-    build:
-      context: ./backend
+    build: ./backend
     ports:
       - "5000:5000"
     env_file:
-      - ./backend/.env
-    volumes:
-      - ./backend:/app
+      - .env
+
     depends_on:
       - db
+    volumes:
+      - ./backend:/app
+    networks:
+      - app-network
 
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile.dev
+    build: ./frontend
     ports:
       - "3000:3000"
     volumes:
       - ./frontend:/app
-    command: ["npm", "start"]
-    depends_on:
-      - backend
-
+    stdin_open: true
+    tty: true
+    networks:
+      - app-network
 
   db:
-    image: postgres:15
+    image: postgres:14
+    restart: always
     environment:
-      POSTGRES_DB: project_game
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: project_db
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - app-network
 
 volumes:
-  postgres_data:
+  db-data:
+
+networks:
+  app-network:
