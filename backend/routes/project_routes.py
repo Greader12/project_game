@@ -8,6 +8,34 @@ project_bp = Blueprint('project', __name__, url_prefix='/api/projects')
 @project_bp.route("/", methods=["GET"])
 @jwt_required()
 def get_projects():
+    """
+    Get list of projects
+    ---
+    tags:
+      - Projects
+    security:
+      - bearerAuth: []
+    responses:
+      200:
+        description: A list of projects
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  budget:
+                    type: integer
+                  user_id:
+                    type: integer
+      401:
+        description: Unauthorized
+    """
     projects = Project.query.all()
     project_list = [
         {
@@ -23,6 +51,33 @@ def get_projects():
 @project_bp.route("/", methods=["POST"])
 @jwt_required()
 def create_project():
+    """
+    Create a new project
+    ---
+    tags:
+      - Projects
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - name
+              - budget
+            properties:
+              name:
+                type: string
+              budget:
+                type: integer
+    responses:
+      201:
+        description: Project created
+      400:
+        description: Missing name or budget
+    """
     data = request.get_json()
     name = data.get("name")
     budget = data.get("budget")
