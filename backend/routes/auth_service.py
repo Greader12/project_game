@@ -1,7 +1,7 @@
 from models.user import User
 from models import db
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token, create_refresh_token
 
 def register_user(username, password):
     existing_user = User.query.filter_by(username=username).first()
@@ -23,8 +23,10 @@ def authenticate_user(username, password):
     if not user or not check_password_hash(user.password_hash, password):
         return {"error": "Invalid username or password."}, 401
 
-    # Создание JWT токена
     access_token = create_access_token(identity=str(user.id))
+    refresh_token = create_refresh_token(identity=str(user.id))  # 🎯 Новый Refresh токен!
 
-
-    return {"access_token": access_token}, 200
+    return {
+        "access_token": access_token,
+        "refresh_token": refresh_token
+    }, 200
