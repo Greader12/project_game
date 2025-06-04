@@ -1,18 +1,18 @@
-import React, { useEffect, useState } from 'react';
-import axios from '../axios'; // твой axios
-import './ProjectProgress.css'; // стили для панели
+import React, { useEffect, useState, useCallback } from 'react';
+import axios from '../axios';
+import './ProjectProgress.css';
 
 const ProjectProgress = ({ projectId }) => {
   const [progress, setProgress] = useState(null);
 
-  useEffect(() => {
-    fetchProjectProgress();
-  }, [projectId]);
-
-  const fetchProjectProgress = async () => {
+  const fetchProjectProgress = useCallback(async () => {
     const response = await axios.get(`/api/finalize_project/${projectId}`);
     setProgress(response.data);
-  };
+  }, [projectId]); // теперь зависимость явно указана
+
+  useEffect(() => {
+    fetchProjectProgress();
+  }, [fetchProjectProgress]); // нет ошибки зависимостей
 
   if (!progress) {
     return <p>Загрузка прогресса...</p>;
