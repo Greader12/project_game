@@ -2,13 +2,15 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
-from flask_cors import CORS   # 👈 Добавили CORS
-from flasgger import Swagger  # 👈 Swagger для API документации
+from flask_cors import CORS
+from flasgger import Swagger  # 🚀 Swagger импортируем
 from config import Config
 import os
 from models import user, project, task, staff, assignment, event
 from models import db
-from schemas import ma
+from schemas import ma  # Marshmallow
+from errors import register_error_handlers  # Глобальный обработчик ошибок
+
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 jwt = JWTManager()
@@ -17,8 +19,10 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
 
-    
-    # 🔥 CORS настройка
+    # Init Marshmallow
+    ma.init_app(app)
+
+    # CORS настройка
     cors = CORS(app, resources={
         r"/api/*": {
             "origins": [
@@ -29,27 +33,28 @@ def create_app():
             "allow_headers": ["Authorization", "Content-Type"],
         }
     })
-    ma.init_app(app)
+
     db.init_app(app)
     jwt.init_app(app)
 
-    # 🔥 Swagger настройка
-    Swagger(app, template={
-        "swagger": "2.0",
-        "info": {
-            "title": "Project Management API",
-            "description": "API for user registration, login, and project management",
-            "version": "1.0"
-        },
-        "securityDefinitions": {
-            "bearerAuth": {
-                "type": "apiKey",
-                "name": "Authorization",
-                "in": "header",
-                "description": "Enter: **Bearer &lt;JWT&gt;**"
-            }
-        },
-    })
+    # 🚀 Swagger подключаем ТОЛЬКО в режиме разработки
+    if app.config["ENV"] == "development":
+        Swagger(app, template={
+            "swagger": "2.0",
+            "info": {
+                "title": "Project Management API",
+                "description": "API for user registration, login, and project management",
+                "version": "1.0"
+            },
+            "securityDefinitions": {
+                "bearerAuth": {
+                    "type": "apiKey",
+                    "name": "Authorization",
+                    "in": "header",
+                    "description": "Enter: **Bearer &lt;JWT&gt;**"
+                }
+            },
+        })
 
     @jwt.user_identity_loader
     def user_identity_lookup(identity):
@@ -68,6 +73,9 @@ def create_app():
     app.register_blueprint(staff_bp)
     app.register_blueprint(task_bp)
     app.register_blueprint(assignment_bp)
+
+    # Регистрация глобального обработчика ошибок
+    register_error_handlers(app)
 
     return app
 
