@@ -3,6 +3,7 @@ from flask.views import MethodView
 from flask_jwt_extended import jwt_required
 from marshmallow import Schema, fields
 
+
 from services.staff_service import (
     create_staff, get_all_staff, add_xp_to_staff, assign_skill_upgrade,
     add_fatigue_to_staff, rest_staff, get_effective_speed, trigger_random_event

@@ -1,12 +1,15 @@
-from flask_smorest import Blueprint, abort
 from flask.views import MethodView
-from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity
-from marshmallow import Schema, fields
+from flask_jwt_extended import jwt_required, get_jwt_identity, create_access_token, create_refresh_token
+from flask_smorest import Blueprint
+from werkzeug.security import generate_password_hash
 from models.user import User
-from models import db
-from werkzeug.security import generate_password_hash, check_password_hash
+from extensions import db
+from flask_smorest import abort
+from flask_jwt_extended import get_jwt_identity
+from marshmallow import Schema, fields
+blp = Blueprint('auth', __name__, description="Authentication operations")
 
-blp = Blueprint('auth', 'auth', url_prefix='/api/auth', description='Authentication routes')
+
 
 class UserRegisterSchema(Schema):
     username = fields.Str(required=True)
@@ -29,7 +32,7 @@ class Register(MethodView):
             abort(400, message="User already exists")
         
         hashed_password = generate_password_hash(user_data['password'])
-        new_user = User(username=user_data['username'], password=hashed_password)
+        new_user = User(username=user_data['username'], password_hash=hashed_password)
 
         db.session.add(new_user)
         db.session.commit()
@@ -43,7 +46,7 @@ class Login(MethodView):
     def post(self, login_data):
         user = User.query.filter_by(username=login_data['username']).first()
 
-        if user and check_password_hash(user.password, login_data['password']):
+        if user and user.check_password(login_data['password']):  # ✅ Исправлено здесь
             access_token = create_access_token(identity=user.id)
             refresh_token = create_refresh_token(identity=user.id)
             return {
@@ -55,6 +58,7 @@ class Login(MethodView):
 @blp.route('/refresh')
 class Refresh(MethodView):
     @jwt_required(refresh=True)
+    @blp.doc(security=[{"BearerAuth": []}])  # <-- добавлено здесь!
     @blp.response(200, TokenSchema)
     def post(self):
         identity = get_jwt_identity()

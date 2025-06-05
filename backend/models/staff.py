@@ -1,4 +1,4 @@
-from models import db
+from extensions import db
 
 class Staff(db.Model):
     id = db.Column(db.Integer, primary_key=True)

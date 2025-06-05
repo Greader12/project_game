@@ -3,7 +3,7 @@ from flask.views import MethodView
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from marshmallow import Schema, fields
 from models.project import Project
-from models import db
+from extensions import db
 
 blp = Blueprint('projects', 'projects', url_prefix='/api/projects', description='Project operations')
 

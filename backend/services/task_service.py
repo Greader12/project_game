@@ -1,5 +1,5 @@
 from models.task import Task
-from models import db
+from extensions import db
 
 def create_task(name, base_duration, base_cost, project_id, start_week):
     task = Task(

@@ -1,5 +1,5 @@
 from models.staff import Staff
-from models import db
+from extensions import db
 import random
 
 def create_staff(name, role, speed, cost):

@@ -3,7 +3,7 @@ from flask.views import MethodView
 from flask_jwt_extended import jwt_required
 from marshmallow import Schema, fields
 from models.assignment import Assignment
-from models import db
+from extensions import db
 
 blp = Blueprint('assignments', 'assignments', url_prefix='/api/assignments', description='Assignment operations')
 

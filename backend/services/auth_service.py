@@ -1,32 +1,31 @@
 from models.user import User
-from models import db
+from extensions import db
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token, create_refresh_token
 
-def register_user(username, password):
-    existing_user = User.query.filter_by(username=username).first()
+def register_user(data):
+    username = data.get('username')
+    password = data.get('password')
 
-    if existing_user:
-        return {"error": "Username already exists."}, 409
+    if User.query.filter_by(username=username).first():
+        raise Exception('User already exists')
 
-    hashed_password = generate_password_hash(password)
-    new_user = User(username=username, password_hash=hashed_password)
+    new_user = User(username=username)
+    new_user.set_password(password)  # Установить пароль с шифрованием
 
     db.session.add(new_user)
     db.session.commit()
+    return new_user
 
-    return {"message": "User registered successfully."}, 201
+def login_user(data):
+    username = data.get('username')
+    password = data.get('password')
 
-def authenticate_user(username, password):
     user = User.query.filter_by(username=username).first()
 
-    if not user or not check_password_hash(user.password_hash, password):
-        return {"error": "Invalid username or password."}, 401
+    if user and user.check_password(password):  # ✅ Проверяем пароль через метод
+        # логика генерации токена
+        access_token = create_access_token(identity=user.id)
+        return {'access_token': access_token}
 
-    access_token = create_access_token(identity=str(user.id))
-    refresh_token = create_refresh_token(identity=str(user.id))  # 🎯 Новый Refresh токен!
-
-    return {
-        "access_token": access_token,
-        "refresh_token": refresh_token
-    }, 200
+    raise Exception('Invalid credentials')

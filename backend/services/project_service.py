@@ -3,7 +3,7 @@ from models.task import Task
 from models.staff import Staff
 from models.assignment import Assignment
 from models.event import Event
-from models.db import db
+from extensions import db
 import random
 
 def simulate_week(project_id):

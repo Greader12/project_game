@@ -1,4 +1,4 @@
-from app import create_app, db
+from app import app  # Импортируем уже созданное приложение
 from models.user import User
 from models.project import Project
 from models.task import Task
