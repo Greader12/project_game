@@ -1,55 +1,38 @@
-from flask import Blueprint, request, jsonify
+from flask_smorest import Blueprint, abort
+from flask.views import MethodView
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from marshmallow import Schema, fields
 from models.project import Project
 from models import db
-from schemas import ProjectSchema  # 🔥 Импорт схемы
 
-project_bp = Blueprint('project', __name__, url_prefix='/api/projects')
+blp = Blueprint('projects', 'projects', url_prefix='/api/projects', description='Project operations')
 
-@project_bp.route("/", methods=["GET"])
-@jwt_required()
-def get_projects():
-    """
-    Get list of projects
-    ---
-    tags:
-      - Projects
-    security:
-      - bearerAuth: []
-    """
-    projects = Project.query.all()
-    project_list = [
-        {
-            "id": project.id,
-            "name": project.name,
-            "budget": project.budget,
-            "user_id": project.user_id
-        }
-        for project in projects
-    ]
-    return jsonify(project_list), 200
+class ProjectSchema(Schema):
+    id = fields.Int(dump_only=True)
+    name = fields.Str(required=True)
+    budget = fields.Int(required=True)
+    user_id = fields.Int(dump_only=True)
 
-@project_bp.route("/", methods=["POST"])
-@jwt_required()
-def create_project():
-    """
-    Create a new project
-    ---
-    tags:
-      - Projects
-    security:
-      - bearerAuth: []
-    """
-    schema = ProjectSchema()
-    data = schema.load(request.get_json())  # 🔥 Валидация здесь
+class ProjectCreateSchema(Schema):
+    name = fields.Str(required=True)
+    budget = fields.Int(required=True)
 
-    name = data["name"]
-    budget = data["budget"]
+@blp.route('/')
+class ProjectsList(MethodView):
+    @jwt_required()
+    @blp.response(200, ProjectSchema(many=True))
+    def get(self):
+        """Получение списка проектов"""
+        projects = Project.query.all()
+        return projects
 
-    user_id = get_jwt_identity()
-    new_project = Project(name=name, budget=budget, user_id=user_id)
-
-    db.session.add(new_project)
-    db.session.commit()
-
-    return jsonify({"message": "Project created successfully."}), 201
+    @jwt_required()
+    @blp.arguments(ProjectCreateSchema)
+    @blp.response(201, ProjectSchema)
+    def post(self, project_data):
+        """Создание нового проекта"""
+        user_id = get_jwt_identity()
+        project = Project(name=project_data['name'], budget=project_data['budget'], user_id=user_id)
+        db.session.add(project)
+        db.session.commit()
+        return project

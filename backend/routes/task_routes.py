@@ -1,24 +1,35 @@
-from flask import Blueprint, request, jsonify
-from services.task_service import create_task, get_all_tasks
+from flask_smorest import Blueprint, abort
+from flask.views import MethodView
+from flask_jwt_extended import jwt_required
+from marshmallow import Schema, fields
+from models.task import Task
+from models import db
 
-task_bp = Blueprint('task', __name__)
+blp = Blueprint('tasks', 'tasks', url_prefix='/api/tasks', description='Task operations')
 
-@task_bp.route("/api/tasks", methods=["POST"])
-def create():
-    data = request.get_json()
-    name = data.get("name")
-    base_duration = data.get("base_duration")
-    base_cost = data.get("base_cost")
-    project_id = data.get("project_id")
-    start_week = data.get("start_week")
+class TaskSchema(Schema):
+    id = fields.Int(dump_only=True)
+    name = fields.Str(required=True)
+    base_duration = fields.Int(required=True)
+    base_cost = fields.Int(required=True)
+    project_id = fields.Int(required=True)
+    start_week = fields.Int(required=True)
 
-    if not name or base_duration is None or base_cost is None or not project_id or start_week is None:
-        return jsonify({"error": "Missing task information"}), 400
+@blp.route('/')
+class TasksList(MethodView):
+    @jwt_required()
+    @blp.response(200, TaskSchema(many=True))
+    def get(self):
+        """Получение списка задач"""
+        tasks = Task.query.all()
+        return tasks
 
-    response, status = create_task(name, base_duration, base_cost, project_id, start_week)
-    return jsonify(response), status
-
-@task_bp.route("/api/tasks", methods=["GET"])
-def get():
-    tasks = get_all_tasks()
-    return jsonify(tasks)
+    @jwt_required()
+    @blp.arguments(TaskSchema)
+    @blp.response(201, TaskSchema)
+    def post(self, task_data):
+        """Создание новой задачи"""
+        task = Task(**task_data)
+        db.session.add(task)
+        db.session.commit()
+        return task

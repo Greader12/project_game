@@ -1,0 +1,41 @@
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+    container_name: project-backend
+    restart: always
+    env_file:
+      - ./backend/.env
+    environment:
+      - FLASK_ENV=production
+    expose:
+      - 5000
+    depends_on:
+      - db
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+    container_name: project-frontend
+    restart: always
+    ports:
+      - "80:80"  # HTTP
+    depends_on:
+      - backend
+
+  db:
+    image: postgres:14
+    container_name: project-db
+    restart: always
+    environment:
+      POSTGRES_USER: your_db_user
+      POSTGRES_PASSWORD: your_db_password
+      POSTGRES_DB: your_db_name
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+volumes:
+  db-data:

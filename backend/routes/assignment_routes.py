@@ -1,32 +1,32 @@
-from flask import Blueprint, request, jsonify
+from flask_smorest import Blueprint, abort
+from flask.views import MethodView
+from flask_jwt_extended import jwt_required
+from marshmallow import Schema, fields
 from models.assignment import Assignment
 from models import db
 
-assignment_bp = Blueprint('assignment', __name__)
+blp = Blueprint('assignments', 'assignments', url_prefix='/api/assignments', description='Assignment operations')
 
-@assignment_bp.route("/api/assignments", methods=["POST"])
-def assign_staff():
-    data = request.get_json()
-    task_id = data.get("task_id")
-    staff_id = data.get("staff_id")
+class AssignmentSchema(Schema):
+    id = fields.Int(dump_only=True)
+    task_id = fields.Int(required=True)
+    staff_id = fields.Int(required=True)
 
-    if not task_id or not staff_id:
-        return jsonify({"error": "Missing task_id or staff_id"}), 400
+@blp.route('/')
+class AssignmentList(MethodView):
+    @jwt_required()
+    @blp.response(200, AssignmentSchema(many=True))
+    def get(self):
+        """Получение списка назначений"""
+        assignments = Assignment.query.all()
+        return assignments
 
-    assignment = Assignment(task_id=task_id, staff_id=staff_id)
-    db.session.add(assignment)
-    db.session.commit()
-
-    return jsonify({"message": "Staff assigned to task successfully"})
-
-@assignment_bp.route("/api/assignments", methods=["GET"])
-def get_assignments():
-    assignments = Assignment.query.all()
-    return jsonify([
-        {
-            "id": a.id,
-            "task_id": a.task_id,
-            "staff_id": a.staff_id
-        }
-        for a in assignments
-    ])
+    @jwt_required()
+    @blp.arguments(AssignmentSchema)
+    @blp.response(201, AssignmentSchema)
+    def post(self, assignment_data):
+        """Назначение сотрудника на задачу"""
+        assignment = Assignment(**assignment_data)
+        db.session.add(assignment)
+        db.session.commit()
+        return assignment
