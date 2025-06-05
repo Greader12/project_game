@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity
 from services.auth_service import register_user, authenticate_user
+from schemas import UserSchema  # 🔥 Импорт схемы
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/api')
 
@@ -11,32 +12,12 @@ def register():
     ---
     tags:
       - Auth
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            required:
-              - username
-              - password
-            properties:
-              username:
-                type: string
-              password:
-                type: string
-    responses:
-      201:
-        description: User registered successfully
-      409:
-        description: Username already exists
     """
-    data = request.get_json()
-    username = data.get("username")
-    password = data.get("password")
+    schema = UserSchema()
+    data = schema.load(request.get_json())  # 🔥 Валидация здесь
 
-    if not username or not password:
-        return jsonify({"error": "Missing username or password"}), 400
+    username = data["username"]
+    password = data["password"]
 
     response, status = register_user(username, password)
     return jsonify(response), status
@@ -48,29 +29,12 @@ def login():
     ---
     tags:
       - Auth
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            required:
-              - username
-              - password
-            properties:
-              username:
-                type: string
-              password:
-                type: string
-    responses:
-      200:
-        description: Login successful
-      401:
-        description: Invalid credentials
     """
-    data = request.get_json()
-    username = data.get("username")
-    password = data.get("password")
+    schema = UserSchema()
+    data = schema.load(request.get_json())  # 🔥 Валидация здесь
+
+    username = data["username"]
+    password = data["password"]
 
     response, status = authenticate_user(username, password)
     return jsonify(response), status

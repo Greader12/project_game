@@ -2,12 +2,13 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
+from flask_cors import CORS   # 👈 Добавили CORS
+from flasgger import Swagger  # 👈 Swagger для API документации
 from config import Config
 import os
-from flasgger import Swagger  # 👈 Импортируем Flasgger
 from models import user, project, task, staff, assignment, event
 from models import db
-
+from schemas import ma
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 jwt = JWTManager()
@@ -16,10 +17,23 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
 
+    
+    # 🔥 CORS настройка
+    cors = CORS(app, resources={
+        r"/api/*": {
+            "origins": [
+                "http://localhost:3000",       # Фронт локальный
+                "https://yourgame.com"         # Продакшн домен (заменишь позже)
+            ],
+            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+            "allow_headers": ["Authorization", "Content-Type"],
+        }
+    })
+    ma.init_app(app)
     db.init_app(app)
     jwt.init_app(app)
 
-    # 🚀 Swagger с описанием авторизации
+    # 🔥 Swagger настройка
     Swagger(app, template={
         "swagger": "2.0",
         "info": {

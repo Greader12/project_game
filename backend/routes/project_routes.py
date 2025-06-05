@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models.project import Project
 from models import db
+from schemas import ProjectSchema  # 🔥 Импорт схемы
 
 project_bp = Blueprint('project', __name__, url_prefix='/api/projects')
 
@@ -15,26 +16,6 @@ def get_projects():
       - Projects
     security:
       - bearerAuth: []
-    responses:
-      200:
-        description: A list of projects
-        content:
-          application/json:
-            schema:
-              type: array
-              items:
-                type: object
-                properties:
-                  id:
-                    type: integer
-                  name:
-                    type: string
-                  budget:
-                    type: integer
-                  user_id:
-                    type: integer
-      401:
-        description: Unauthorized
     """
     projects = Project.query.all()
     project_list = [
@@ -58,32 +39,12 @@ def create_project():
       - Projects
     security:
       - bearerAuth: []
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            required:
-              - name
-              - budget
-            properties:
-              name:
-                type: string
-              budget:
-                type: integer
-    responses:
-      201:
-        description: Project created
-      400:
-        description: Missing name or budget
     """
-    data = request.get_json()
-    name = data.get("name")
-    budget = data.get("budget")
+    schema = ProjectSchema()
+    data = schema.load(request.get_json())  # 🔥 Валидация здесь
 
-    if not name or not budget:
-        return jsonify({"error": "Missing name or budget."}), 400
+    name = data["name"]
+    budget = data["budget"]
 
     user_id = get_jwt_identity()
     new_project = Project(name=name, budget=budget, user_id=user_id)
