@@ -12,6 +12,6 @@ class Config:
     JWT_IDENTITY_CLAIM = 'sub'  # 👈 ЭТО!
 
         # ⏳ Настройки времени жизни токенов
-    JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=15)
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=45)
     JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=7)
     MAX_CONTENT_LENGTH = 1 * 1024 * 1024  # 1 MB
