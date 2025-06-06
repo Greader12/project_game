@@ -5,7 +5,7 @@ from models.assignment import Assignment
 from models.event import Event
 from extensions import db
 import random
-
+from flask_smorest import abort
 def simulate_week(project_id):
     project = Project.query.get(project_id)
     if not project or project.status != "In Progress":

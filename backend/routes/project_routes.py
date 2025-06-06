@@ -22,8 +22,9 @@ class ProjectsList(MethodView):
     @jwt_required()
     @blp.response(200, ProjectSchema(many=True))
     def get(self):
-        """Получение списка проектов"""
-        projects = Project.query.all()
+        """Получение только проектов текущего пользователя"""
+        user_id = get_jwt_identity()
+        projects = Project.query.filter_by(user_id=user_id).all()
         return projects
 
     @jwt_required()
@@ -36,3 +37,5 @@ class ProjectsList(MethodView):
         db.session.add(project)
         db.session.commit()
         return project
+ 
+ 

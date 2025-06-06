@@ -6,7 +6,7 @@ from models.task import Task
 from extensions import db
 from utils.permissions import admin_required
 
-blp = Blueprint('tasks', 'tasks', url_prefix='/api/tasks', description='Task operations')
+blp = Blueprint('admin_tasks', 'admin_tasks', url_prefix='/api/admin/tasks', description='Admin Task operations')
 
 class TaskSchema(Schema):
     id = fields.Int(dump_only=True)
@@ -17,24 +17,13 @@ class TaskSchema(Schema):
     start_week = fields.Int(required=True)
 
 @blp.route('/')
-class TasksList(MethodView):
-    @jwt_required()
-    @blp.response(200, TaskSchema(many=True))
-    def get(self):
-        """Получение задач пользователя"""
-        user_id = get_jwt_identity()
-        # Получаем id проектов текущего пользователя
-        user_project_ids = [p.id for p in Project.query.filter_by(user_id=user_id).all()]
-        # Фильтруем задачи по этим проектам
-        tasks = Task.query.filter(Task.project_id.in_(user_project_ids)).all()
-        return tasks
-
+class AdminTasksList(MethodView):
     @jwt_required()
     @admin_required
     @blp.arguments(TaskSchema)
     @blp.response(201, TaskSchema)
     def post(self, task_data):
-        """Создание новой задачи"""
+        """Создание новой задачи (админ)"""
         task = Task(**task_data)
         db.session.add(task)
         db.session.commit()

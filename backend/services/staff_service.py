@@ -1,9 +1,15 @@
 from models.staff import Staff
 from extensions import db
 import random
+from flask_smorest import abort
+from models.project import Project
 
-def create_staff(name, role, speed, cost):
-    staff = Staff(name=name, role=role, speed=speed, cost=cost)
+def create_staff(name, role, speed, cost, project_id):
+    project = Project.query.get(project_id)
+    if project.budget_spent + cost > project.budget:
+        abort(400, message="Budget limit exceeded")
+
+    staff = Staff(name=name, role=role, speed=speed, cost=cost, project_id=project_id)
     db.session.add(staff)
     db.session.commit()
     return {"message": "Staff member created successfully"}, 201
@@ -40,6 +46,8 @@ def add_xp_to_staff(staff_id, xp_amount):
         staff.xp -= staff.level * 100
         staff.level += 1
         level_up = True
+    # после увеличения XP
+    staff.xp = min(staff.xp, 1000)
 
     db.session.commit()
 
@@ -76,6 +84,8 @@ def add_fatigue_to_staff(staff_id, fatigue_amount):
         return {"error": "Staff not found"}, 404
 
     staff.fatigue += fatigue_amount
+    # после увеличения усталости
+    staff.fatigue = min(staff.fatigue, 100)
 
     # Ограничим усталость 0–100
     if staff.fatigue > 100:

@@ -8,8 +8,13 @@ from routes.project_routes import blp as ProjectBlueprint
 from routes.staff_routes import blp as StaffBlueprint
 from routes.task_routes import blp as TaskBlueprint
 from routes.assignment_routes import blp as AssignmentBlueprint
+from routes.token_routes import blp as TokenBlueprint
+from routes.event_routes import blp as EventBlueprint
+from routes.admin_task_routes import blp as AdminTaskBlueprint
 from utils.error_handlers import register_error_handlers  # если у тебя есть кастомные обработчики ошибок
 from extensions import db, jwt
+
+
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
@@ -45,7 +50,9 @@ def create_app():
     api.register_blueprint(StaffBlueprint)
     api.register_blueprint(TaskBlueprint)
     api.register_blueprint(AssignmentBlueprint)
-
+    api.register_blueprint(TokenBlueprint)
+    api.register_blueprint(EventBlueprint)
+    api.register_blueprint(AdminTaskBlueprint)
     # Дополнительная настройка jwt (если требуется)
     @jwt.user_identity_loader
     def user_identity_lookup(identity):

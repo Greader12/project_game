@@ -1,7 +1,11 @@
 from models.task import Task
 from extensions import db
-
+from models.project import Project
 def create_task(name, base_duration, base_cost, project_id, start_week):
+    project = Project.query.get(project_id)
+    if project.budget_spent + base_cost > project.budget:
+        abort(400, message="Budget limit exceeded")
+
     task = Task(
         name=name,
         base_duration=base_duration,
