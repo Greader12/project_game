@@ -17,7 +17,7 @@ services:
   frontend:
     build: ./frontend
     ports:
-      - "3000:3000"
+      - "3000:80"  # Nginx отдает на 80 порту
     volumes:
       - ./frontend:/app
     stdin_open: true

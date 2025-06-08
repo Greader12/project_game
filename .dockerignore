@@ -1,0 +1,32 @@
+# Создадим файл .dockerignore
+dockerignore_content = """
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# Node.js
+node_modules/
+build/
+dist/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+
+# Env files
+.env
+.env.*
+"""
+
+# Сохраняем .dockerignore
+with open("/mnt/data/.dockerignore", "w") as f:
+    f.write(dockerignore_content)

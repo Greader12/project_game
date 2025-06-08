@@ -7,7 +7,8 @@ from extensions import db
 from flask_smorest import abort
 from flask_jwt_extended import get_jwt_identity
 from marshmallow import Schema, fields
-blp = Blueprint('auth', __name__, description="Authentication operations")
+blp = Blueprint('auth', __name__, url_prefix='/api', description="Authentication operations")
+
 
 
 
@@ -31,13 +32,14 @@ class Register(MethodView):
         if User.query.filter_by(username=user_data['username']).first():
             abort(400, message="User already exists")
         
-        hashed_password = generate_password_hash(user_data['password'])
-        new_user = User(username=user_data['username'], password_hash=hashed_password)
+        new_user = User(username=user_data['username'])
+        new_user.set_password(user_data['password'])
 
         db.session.add(new_user)
         db.session.commit()
 
         return {"message": "User created successfully"}
+
 
 @blp.route('/login')
 class Login(MethodView):

@@ -1,19 +1,22 @@
-# Сборка фронтенда
+# Используем Node.js для сборки
 FROM node:20 AS build
 
 WORKDIR /app
-COPY package.json package-lock.json ./
-RUN npm install --legacy-peer-deps
+
+COPY package*.json ./
+RUN npm install
+
 COPY . .
 RUN npm run build
 
-# Статичный сервер для фронта
-FROM nginx:stable-alpine
+# Используем Nginx для отдачи фронтенда
+FROM nginx:alpine
 
-COPY --from=build /app/build /usr/share/nginx/html
+# Копируем сборку Vite в папку Nginx
+COPY --from=build /app/dist /usr/share/nginx/html
 
-# Копируем nginx конфиг, если нужно (не обязательно)
-# COPY nginx.conf /etc/nginx/nginx.conf
+# Копируем дефолтный конфиг nginx
+COPY --from=build /app/nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
 
