@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import axios from '../axios';
+import axios from '../api/axios';
 import './ProjectProgress.css';
 
 const ProjectProgress = ({ projectId }) => {

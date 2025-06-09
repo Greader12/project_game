@@ -19,11 +19,11 @@ services:
       context: ./frontend
       dockerfile: Dockerfile.prod
       args:
-        VITE_API_URL: "/api"  # 🚀 <-- СЮДА: теперь правильный путь
+        VITE_API_URL: "/api"
     container_name: project-frontend
     restart: always
     ports:
-      - "80:80"  # HTTP
+      - "80:80"
     depends_on:
       - backend
 

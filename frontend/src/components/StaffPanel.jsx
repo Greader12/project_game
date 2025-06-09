@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from '../axios'; // Подключи твой axios файл
+import axios from "../api/axios"; // ✅ правильно
 import Modal from './Modal'; // Подключение модалки
 import './StaffPanel.css'; // Стили для карточек
 
