@@ -1,4 +1,4 @@
-// frontend/src/components/tasks/TaskGantt.jsx
+// src/components/tasks/TaskGantt.jsx
 import React, { useState, useEffect } from "react";
 import { useGame } from "../../context/GameContext";
 import { useTranslation } from "react-i18next";
@@ -40,9 +40,9 @@ function TaskGantt({ totalWeeks = 20 }) {
       ) : (
         <div className="space-y-4">
           {filteredTasks.map((task, index) => {
-            const start = task.startWeek;
-            const end = start + task.duration - 1;
-            const progressPercent = Math.min(task.progress, 100);
+            const start = task.startWeek || 0;
+            const end = start + (task.duration || 1) - 1;
+            const progressPercent = Math.min(task.progress ?? 0, 100);
 
             const barStart = `${(start / totalWeeks) * 100}%`;
             const barWidth = `${(task.duration / totalWeeks) * 100}%`;

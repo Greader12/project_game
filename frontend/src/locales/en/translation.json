@@ -14,7 +14,7 @@
   "task": "Task",
   "duration": "Duration",
   "progress": "Progress",
-  "assigned": "Assigned Staff",
+  "assigned": "Assigned",
   "weeks": "weeks",
   "noTasks": "No tasks to display",
   "staffManagement": "Staff Management",

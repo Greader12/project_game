@@ -7,14 +7,12 @@ function GameController({ onTriggerEvent }) {
   const { week, nextWeek } = useGame();
   const { t } = useTranslation();
 
-
   const handleNextWeek = () => {
-    // Пример простого рандомного события
     if (Math.random() < 0.2) {
       const event = {
-        title: "🚨 Unexpected Event!",
-        description: "One of your staff members took a sudden leave.",
-        impact: "-1 staff efficiency"
+        title: t("randomEventTitle"),
+        description: t("randomEventDescription"),
+        impact: t("randomEventImpact")
       };
       onTriggerEvent(event);
     }
@@ -26,8 +24,8 @@ function GameController({ onTriggerEvent }) {
       marginBottom: "20px",
       textAlign: "center"
     }}>
-      <h3>🕓 Simulation Control</h3>
-      <p>Current Week: <strong>{week}</strong></p>
+      <h3>🕓 {t("simulationControl")}</h3>
+      <p>{t("currentWeek")}: <strong>{week}</strong></p>
       <button onClick={handleNextWeek} style={{
         padding: "10px 20px",
         backgroundColor: "#6b46c1",
@@ -36,7 +34,7 @@ function GameController({ onTriggerEvent }) {
         borderRadius: "5px",
         cursor: "pointer"
       }}>
-        Advance to Next Week ➡️
+        {t("nextWeek")}
       </button>
     </div>
   );

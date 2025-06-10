@@ -8,6 +8,18 @@ export function GameProvider({ children }) {
   const [week, setWeek] = useState(1);
   const [budget, setBudget] = useState(10000);
   
+
+  const simulateWeek = async () => {
+  try {
+    await axios.post("/api/tasks/simulate_week");
+    await loadGame(); // Обновить состояние после симуляции
+  } catch (err) {
+    console.error("Failed to simulate week:", err);
+    alert("Ошибка симуляции недели");
+  }
+};
+
+  
   const [staff, setStaff] = useState([
     { id: 1, name: "Alice", speed: 3, cost: 1000 },
     { id: 2, name: "Bob", speed: 2, cost: 800 },
@@ -37,17 +49,23 @@ export function GameProvider({ children }) {
   };
 
   const nextWeek = () => {
-    setWeek(prev => prev + 1);
+    setWeek((prev) => {
+      const newWeek = prev + 1;
 
-    setTasks(prevTasks => prevTasks.map(task => {
-      if (!task.assignedStaffId) return task;
-      const assigned = staff.find(s => s.id === task.assignedStaffId);
-      const speed = assigned ? assigned.speed : 1;
-      const newProgress = Math.min(task.progress + speed * 100 / task.duration, 100);
-      return { ...task, progress: newProgress };
-    }));
+      setTasks((prevTasks) => {
+        return prevTasks.map((task) => {
+          if (task.progress >= 100 || !task.assignedStaffId) return task;
 
-    setBudget(prev => prev - 500);
+          const assigned = staff.find((s) => s.id === task.assignedStaffId);
+          const speed = assigned?.speed ?? 0;
+
+          const newProgress = Math.min(task.progress + speed, 100);
+          return { ...task, progress: newProgress };
+        });
+      });
+
+      return newWeek;
+    });
   };
 
   const saveGame = async () => {
@@ -83,7 +101,7 @@ export function GameProvider({ children }) {
         value={{
           week, budget, staff, tasks, events,
           assignStaffToTask, nextWeek,
-          saveGame, loadGame
+          saveGame, loadGame, simulateWeek
         }}
     >
       {children}

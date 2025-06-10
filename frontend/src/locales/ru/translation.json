@@ -42,5 +42,8 @@
   "registerSuccess": "Регистрация успешна!",
   "impact": "Эффект",
   "close": "Закрыть",
-  "ganttTitle": "Диаграмма задач"
+  "ganttTitle": "Диаграмма задач",
+  "resources": "Ресурсы",
+  "budget": "Бюджет"
+
 }
