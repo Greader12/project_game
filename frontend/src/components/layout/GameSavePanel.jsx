@@ -1,9 +1,11 @@
 // src/components/layout/GameSavePanel.jsx
 import React from "react";
 import { useGame } from "../../context/GameContext";
+import { useTranslation } from "react-i18next";
 
 function GameSavePanel() {
   const { saveGame, loadGame } = useGame();
+  const { t } = useTranslation();
 
   return (
     <div style={{ margin: "20px 0", textAlign: "center" }}>
@@ -19,7 +21,7 @@ function GameSavePanel() {
           cursor: "pointer"
         }}
       >
-        💾 Save Progress
+        💾 {t("saveProgress")}
       </button>
       <button
         onClick={loadGame}
@@ -32,7 +34,7 @@ function GameSavePanel() {
           cursor: "pointer"
         }}
       >
-        📤 Load Progress
+        📤 {t("loadProgress")}
       </button>
     </div>
   );

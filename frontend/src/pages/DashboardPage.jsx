@@ -9,11 +9,11 @@ import GameSavePanel from "../components/layout/GameSavePanel";
 import ResourcePanel from "../components/layout/ResourcePanel";
 import Timeline from "../components/layout/Timeline";
 import TaskGantt from "../components/tasks/TaskGantt";
-
-
+import { useTranslation } from "react-i18next";
 
 function DashboardPage() {
   const [eventData, setEventData] = useState(null);
+  const { t } = useTranslation();
 
   const handleTriggerEvent = (event) => {
     setEventData(event);
@@ -21,27 +21,15 @@ function DashboardPage() {
 
   return (
     <div className="main-wrapper">
-      <h2>🎯 Project Dashboard</h2>
+      <h2>🎯 {t("dashboardTitle")}</h2>
       <GameSavePanel />
       <ResourcePanel />
       <Timeline totalWeeks={20} />
       <TaskGantt totalWeeks={20} />
-
-
-
-      {/* Панель информации о проекте */}
       <ProjectInfoPanel />
-
-      {/* Управление неделями и событиями */}
       <GameController onTriggerEvent={handleTriggerEvent} />
-
-      {/* Панель сотрудников */}
       <StaffPanel />
-
-      {/* Прогресс задач */}
       <ProjectProgress />
-
-      {/* Модальное окно события */}
       {eventData && (
         <EventModal event={eventData} onClose={() => setEventData(null)} />
       )}

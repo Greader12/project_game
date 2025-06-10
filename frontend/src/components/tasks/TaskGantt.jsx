@@ -1,19 +1,17 @@
 // frontend/src/components/tasks/TaskGantt.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useGame } from "../../context/GameContext";
-import { useEffect } from "react";
-
+import { useTranslation } from "react-i18next";
 
 function TaskGantt({ totalWeeks = 20 }) {
   const { tasks, week } = useGame();
+  const { t } = useTranslation();
   const [filter, setFilter] = useState(() => localStorage.getItem("taskGanttFilter") || "all");
+
   useEffect(() => {
     localStorage.setItem("taskGanttFilter", filter);
   }, [filter]);
 
-
-
-  
   const filteredTasks = tasks.filter((task) => {
     if (filter === "completed") return task.progress >= 100;
     if (filter === "inprogress") return task.progress > 0 && task.progress < 100;
@@ -24,21 +22,21 @@ function TaskGantt({ totalWeeks = 20 }) {
   return (
     <div className="bg-gray-900 text-white p-4 rounded-xl shadow mb-6">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-bold">🗂 Диаграмма задач</h3>
+        <h3 className="text-lg font-bold">🗂 {t("ganttTitle")}</h3>
         <select
           className="bg-gray-800 text-white px-3 py-1 rounded border border-gray-600"
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
         >
-          <option value="all">Все</option>
-          <option value="inprogress">🕒 В процессе</option>
-          <option value="completed">✔️ Завершённые</option>
-          <option value="notstarted">❌ Не начатые</option>
+          <option value="all">{t("all")}</option>
+          <option value="inprogress">{t("inprogress")}</option>
+          <option value="completed">{t("completed")}</option>
+          <option value="notstarted">{t("notstarted")}</option>
         </select>
       </div>
 
       {filteredTasks.length === 0 ? (
-        <p className="text-sm text-gray-400">Нет задач для отображения.</p>
+        <p className="text-sm text-gray-400">{t("noTasks")}</p>
       ) : (
         <div className="space-y-4">
           {filteredTasks.map((task, index) => {

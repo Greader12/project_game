@@ -1,7 +1,10 @@
 // src/components/game/EventModal.jsx
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 function EventModal({ event, onClose }) {
+  const { t } = useTranslation();
+
   return (
     <div style={{
       position: "fixed",
@@ -25,7 +28,7 @@ function EventModal({ event, onClose }) {
       }}>
         <h3>{event.title}</h3>
         <p>{event.description}</p>
-        {event.impact && <p><strong>Impact:</strong> {event.impact}</p>}
+        {event.impact && <p><strong>{t("impact")}:</strong> {event.impact}</p>}
         <button onClick={onClose} style={{
           marginTop: "20px",
           padding: "10px 20px",
@@ -35,7 +38,7 @@ function EventModal({ event, onClose }) {
           borderRadius: "5px",
           cursor: "pointer"
         }}>
-          Close
+          {t("close")}
         </button>
       </div>
     </div>
