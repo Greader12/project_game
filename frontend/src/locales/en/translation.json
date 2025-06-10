@@ -12,5 +12,40 @@
         "duration": "Duration",
         "cost": "Cost",
         "weeks": "weeks",
-        "selectStaff": "-- Select --"
+        "selectStaff": "-- Select --",
+        "timeline": "Project Timeline",
+        "currentWeek": "Current week",
+        "eventOccurred": "Event occurred",
+        "timeline": "Project Timeline",
+        "currentWeek": "Current week",
+        "eventOccurred": "Event occurred",
+        "eventOccurred": "Event occurred",
+        "fire": "Sick Leave",
+        "vacation": "Vacation",
+        "motivation": "Motivation Boost",
+        "conflict": "Conflict",
+        "taskProgress": "Task Progress",
+        "all": "All",
+        "inprogress": "🕒 In Progress",
+        "completed": "✔️ Completed",
+        "notstarted": "❌ Not Started",
+        "task": "Task",
+        "duration": "Duration",
+        "progress": "Progress",
+        "assigned": "Assigned Staff",
+        "staffManagement": "Staff Management",
+        "selectTask": "Select Task",
+        "assign": "Assign",
+        "simulationControl": "Simulation Control",
+        "nextWeek": "Next Week",
+        "week": "Week"
+
+
+
+
+
+
+
+
+
     }

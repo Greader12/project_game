@@ -1,43 +1,49 @@
+// src/pages/DashboardPage.jsx
 import React, { useState } from "react";
-import GameController from "../components/GameController";
-import StaffPanel from "../components/StaffPanel";
-import ProjectProgress from "../components/ProjectProgress";
-import EventModal from "../components/EventModal";
-import ProjectInfoPanel from "../components/ProjectInfoPanel";
+import ProjectInfoPanel from "../components/layout/ProjectInfoPanel";
+import GameController from "../components/game/GameController";
+import EventModal from "../components/game/EventModal";
+import ProjectProgress from "../components/tasks/ProjectProgress";
+import StaffPanel from "../components/game/StaffPanel";
+import GameSavePanel from "../components/layout/GameSavePanel";
+import ResourcePanel from "../components/layout/ResourcePanel";
+import Timeline from "../components/layout/Timeline";
+import TaskGantt from "../components/tasks/TaskGantt";
+
+
 
 function DashboardPage() {
-  const [showEvent, setShowEvent] = useState(false);
   const [eventData, setEventData] = useState(null);
-  const [week, setWeek] = useState(1);
-  const [budget, setBudget] = useState(5000); // стартовый бюджет
-
 
   const handleTriggerEvent = (event) => {
     setEventData(event);
-    setShowEvent(true);
   };
 
   return (
     <div className="main-wrapper">
       <h2>🎯 Project Dashboard</h2>
+      <GameSavePanel />
+      <ResourcePanel />
+      <Timeline totalWeeks={20} />
+      <TaskGantt totalWeeks={20} />
 
-      {/* Компонент управления симуляцией (недели, события и т.д.) */}
+
+
+      {/* Панель информации о проекте */}
+      <ProjectInfoPanel />
+
+      {/* Управление неделями и событиями */}
       <GameController onTriggerEvent={handleTriggerEvent} />
 
       {/* Панель сотрудников */}
-      <h3>Your Staff</h3>
       <StaffPanel />
 
-      {/* Прогресс проекта (задачи) */}
-      <h3>Project Progress</h3>
+      {/* Прогресс задач */}
       <ProjectProgress />
 
-      {/* События */}
-      {showEvent && (
-        <EventModal
-          event={eventData}
-          onClose={() => setShowEvent(false)}
-        />
+      {/* Модальное окно события */}
+      {eventData && (
+        <EventModal event={eventData} onClose={() => setEventData(null)} />
       )}
     </div>
   );
