@@ -1,41 +1,72 @@
-// src/components/game/GameController.jsx
+
 import React from "react";
 import { useGame } from "../../context/GameContext";
-import { useTranslation } from "react-i18next";
 
-function GameController({ onTriggerEvent }) {
-  const { week, nextWeek } = useGame();
-  const { t } = useTranslation();
-
-  const handleNextWeek = () => {
-    if (Math.random() < 0.2) {
-      const event = {
-        title: t("randomEventTitle"),
-        description: t("randomEventDescription"),
-        impact: t("randomEventImpact")
-      };
-      onTriggerEvent(event);
-    }
-    nextWeek();
-  };
+function GameController() {
+  const {
+    week,
+    budget,
+    staff,
+    tasks,
+    assignStaffToTask,
+    simulateWeek,
+    handleRest
+  } = useGame();
 
   return (
-    <div style={{
-      marginBottom: "20px",
-      textAlign: "center"
-    }}>
-      <h3>🕓 {t("simulationControl")}</h3>
-      <p>{t("currentWeek")}: <strong>{week}</strong></p>
-      <button onClick={handleNextWeek} style={{
-        padding: "10px 20px",
-        backgroundColor: "#6b46c1",
-        color: "#fff",
-        border: "none",
-        borderRadius: "5px",
-        cursor: "pointer"
-      }}>
-        {t("nextWeek")}
-      </button>
+    <div className="game-container">
+      <h2>📅 Неделя: {week}</h2>
+      <h3>💰 Бюджет: ${budget.toLocaleString()}</h3>
+
+      <div className="staff-grid">
+        {staff.map(person => (
+          <div className="staff-card" key={person.id} style={{ backgroundColor: person.color }}>
+            <h3>⭐ {person.level} / {person.name} ({person.profession})</h3>
+            <p>💰 Стоимость: ${person.costPerDay} в день</p>
+            <p>🛌 Усталость: {person.fatigue}%</p>
+            <p>💡 Мораль: {person.morale}%</p>
+            <button onClick={() => handleRest(person.id)}>Отдохнуть</button>
+          </div>
+        ))}
+      </div>
+
+      <h3>📈 Диаграмма проекта</h3>
+      <table className="gantt-chart">
+        <thead>
+          <tr>
+            <th>Задача</th>
+            <th>Длительность</th>
+            <th>Прогресс</th>
+            <th>Назначение</th>
+          </tr>
+        </thead>
+        <tbody>
+          {tasks.map(task => (
+            <tr key={task.id}>
+              <td>{task.name}</td>
+              <td>{task.duration} дней</td>
+              <td>
+                <progress value={task.progress} max={task.duration}></progress>
+              </td>
+              <td>
+                <select
+                  value={task.assignedStaffId || ""}
+                  onChange={(e) => assignStaffToTask(task.id, e.target.value)}
+                >
+                  <option value="">Назначить</option>
+                  {staff.map(person => (
+                    <option key={person.id} value={person.id}>
+                      {person.name}
+                    </option>
+                  ))}
+                </select>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <button onClick={simulateWeek} className="start-button mt-4">▶ Следующая неделя</button>
     </div>
   );
 }

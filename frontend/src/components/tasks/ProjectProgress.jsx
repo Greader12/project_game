@@ -1,82 +1,49 @@
-// src/components/tasks/ProjectProgress.jsx
-import React, { useState, useEffect } from "react";
-import { useGame } from "../../context/GameContext";
-import { useTranslation } from "react-i18next";
+import React, { useEffect, useState, useCallback } from 'react';
+import axios from "../../api/axios";
+import './ProjectProgress.css';
 
-function ProjectProgress() {
-  const { tasks, staff } = useGame();
-  const { t } = useTranslation();
-  const [filter, setFilter] = useState(() => localStorage.getItem("taskProgressFilter") || "all");
+const ProjectProgress = ({ projectId }) => {
+  const [progress, setProgress] = useState(null);
+
+  const fetchProjectProgress = useCallback(async () => {
+    const response = await axios.get(`/api/finalize_project/${projectId}`);
+    setProgress(response.data);
+  }, [projectId]); // теперь зависимость явно указана
 
   useEffect(() => {
-    localStorage.setItem("taskProgressFilter", filter);
-  }, [filter]);
+    fetchProjectProgress();
+  }, [fetchProjectProgress]); // нет ошибки зависимостей
 
-  const getStaffName = (id) => {
-    const person = staff.find((s) => s.id === id);
-    return person ? person.name : "—";
-  };
+  if (!progress) {
+    return <p>Загрузка прогресса...</p>;
+  }
 
-  const filteredTasks = tasks.filter((task) => {
-    if (filter === "completed") return task.progress >= 100;
-    if (filter === "inprogress") return task.progress > 0 && task.progress < 100;
-    if (filter === "notstarted") return task.progress === 0;
-    return true;
-  });
+  const costPercent = Math.min((progress.total_cost / progress.max_budget) * 100, 100);
+  const durationPercent = Math.min((progress.total_duration / (progress.max_weeks * 7)) * 100, 100);
 
   return (
-    <div className="p-4">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-xl font-bold">📈 {t("taskProgress")}</h3>
-        <select
-          className="bg-gray-800 text-white px-3 py-1 rounded border border-gray-600"
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-        >
-          <option value="all">{t("all")}</option>
-          <option value="inprogress">{t("inprogress")}</option>
-          <option value="completed">{t("completed")}</option>
-          <option value="notstarted">{t("notstarted")}</option>
-        </select>
+    <div className="project-progress">
+      <h2>Прогресс проекта</h2>
+
+      <div className="progress-bar">
+        <p>💰 Бюджет: {progress.total_cost} / {progress.max_budget}</p>
+        <div className="progress-track">
+          <div className="progress-fill" style={{ width: `${costPercent}%` }}></div>
+        </div>
       </div>
 
-      {filteredTasks.length === 0 ? (
-        <p className="text-sm text-gray-400">{t("noTasks")}</p>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full border border-gray-700 text-white bg-gray-900 rounded-xl">
-            <thead className="bg-gray-800 text-sm text-gray-300">
-              <tr>
-                <th className="p-2 text-left">📝 {t("task")}</th>
-                <th className="p-2 text-left">⌛ {t("duration")}</th>
-                <th className="p-2 text-left">📊 {t("progress")}</th>
-                <th className="p-2 text-left">👤 {t("assigned")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredTasks.map((task) => (
-                <tr key={task.id} className="border-t border-gray-700">
-                  <td className="p-2">{task.name}</td>
-                  <td className="p-2">{task.duration} {t("weeks")}</td>
-                  <td className="p-2">
-                    <div className="w-full bg-gray-700 rounded overflow-hidden h-6">
-                      <div
-                        className="bg-green-500 h-full text-sm text-center text-white transition-all"
-                        style={{ width: `${task.progress}%` }}
-                      >
-                        {Math.round(task.progress)}%
-                      </div>
-                    </div>
-                  </td>
-                  <td className="p-2">{getStaffName(task.assignedStaffId)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      <div className="progress-bar">
+        <p>🕒 Длительность: {progress.total_duration} дней / {progress.max_weeks * 7} дней</p>
+        <div className="progress-track">
+          <div className="progress-fill" style={{ width: `${durationPercent}%` }}></div>
         </div>
-      )}
+      </div>
+
+      <div className={`status ${progress.status === "Success" ? 'success' : 'failure'}`}>
+        {progress.status === "Success" ? "✅ Проект успешен!" : "❌ Проект провален"}
+      </div>
     </div>
   );
-}
+};
 
 export default ProjectProgress;

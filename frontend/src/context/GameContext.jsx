@@ -1,108 +1,133 @@
-// src/context/GameContext.jsx
-import axios from "../api/axios";
-import React, { createContext, useContext, useState, useEffect } from "react";
+
+import React, { createContext, useContext, useState } from "react";
 
 const GameContext = createContext();
 
 export function GameProvider({ children }) {
   const [week, setWeek] = useState(1);
-  const [budget, setBudget] = useState(10000);
-  
+  const [budget, setBudget] = useState(100000);
+  const [staff, setStaff] = useState(generateStaff());
+  const [tasks, setTasks] = useState(generateTasks());
+  const [gameOver, setGameOver] = useState(false);
 
-  const simulateWeek = async () => {
-  try {
-    await axios.post("/api/tasks/simulate_week");
-    await loadGame(); // Обновить состояние после симуляции
-  } catch (err) {
-    console.error("Failed to simulate week:", err);
-    alert("Ошибка симуляции недели");
+  function generateStaff() {
+    const names = ["Ava", "Alex", "Olivia", "Noah", "Mason"];
+    const professions = [
+      { name: "Pilot", color: "blue" },
+      { name: "Engineer", color: "orange" },
+      { name: "Mission Specialist", color: "gray" },
+      { name: "Medic", color: "green" },
+      { name: "Scientist", color: "purple" }
+    ];
+
+    return names.map((name, i) => {
+      const level = Math.ceil(Math.random() * 2);
+      const cost = 900 + level * 100 + Math.floor(Math.random() * 200);
+      return {
+        id: i + 1,
+        name,
+        profession: professions[i].name,
+        color: professions[i].color,
+        level,
+        costPerDay: cost,
+        fatigue: 30 + Math.floor(Math.random() * 20),
+        morale: 80 + Math.floor(Math.random() * 10),
+      };
+    });
   }
-};
 
-  
-  const [staff, setStaff] = useState([
-    { id: 1, name: "Alice", speed: 3, cost: 1000 },
-    { id: 2, name: "Bob", speed: 2, cost: 800 },
-    { id: 3, name: "Charlie", speed: 1, cost: 600 }
-  ]);
+  function generateTasks() {
+    const baseTasks = [
+      "Design UI", "API Backend", "Frontend Integration",
+      "Testing", "Deployment"
+    ];
 
-  const [tasks, setTasks] = useState([
-    { id: 1, name: "Design UI", duration: 6, progress: 0, assignedStaffId: null },
-    { id: 2, name: "API Backend", duration: 8, progress: 0, assignedStaffId: null },
-    { id: 3, name: "Frontend Integration", duration: 5, progress: 0, assignedStaffId: null }
-  ]);
+    return baseTasks.map((name, i) => ({
+      id: i + 1,
+      name,
+      duration: 5 + Math.floor(Math.random() * 5),
+      progress: 0,
+      assignedStaffId: null
+    }));
+  }
 
-  const [events, setEvents] = useState([
-    { week: 2, type: "fire" },
-    { week: 5, type: "vacation" },
-    { week: 6, type: "motivation" },
-    { week: 8, type: "conflict" }
-  ]);
-
-
-  const assignStaffToTask = (taskId, staffId) => {
-    setTasks(prevTasks =>
-      prevTasks.map(task =>
-        task.id === taskId ? { ...task, assignedStaffId: staffId } : task
+  function assignStaffToTask(taskId, staffId) {
+    setTasks(prev =>
+      prev.map(task =>
+        task.id === taskId ? { ...task, assignedStaffId: parseInt(staffId) } : task
       )
     );
-  };
+  }
 
-  const nextWeek = () => {
-    setWeek((prev) => {
-      const newWeek = prev + 1;
+  function handleRest(staffId) {
+    setStaff(prev =>
+      prev.map(p =>
+        p.id === staffId
+          ? {
+              ...p,
+              fatigue: Math.max(0, p.fatigue - 30),
+              morale: Math.min(100, p.morale + 20)
+            }
+          : p
+      )
+    );
+  }
 
-      setTasks((prevTasks) => {
-        return prevTasks.map((task) => {
-          if (task.progress >= 100 || !task.assignedStaffId) return task;
+  function simulateWeek() {
+    if (gameOver) return;
 
-          const assigned = staff.find((s) => s.id === task.assignedStaffId);
-          const speed = assigned?.speed ?? 0;
-
-          const newProgress = Math.min(task.progress + speed, 100);
-          return { ...task, progress: newProgress };
-        });
-      });
-
-      return newWeek;
-    });
-  };
-
-  const saveGame = async () => {
-    try {
-      await axios.post("/save_game", {
-        week, budget, staff, tasks
-      });
-      alert("Game progress saved successfully!");
-    } catch (err) {
-      console.error("Failed to save game:", err);
-      alert("Error saving game.");
+    const allDone = tasks.every(t => t.progress >= t.duration);
+    if (budget <= 0 || allDone) {
+      setGameOver(true);
+      return;
     }
-  };
 
-  const loadGame = async () => {
-    try {
-      const res = await axios.get("/load_game");
-      const data = res.data;
-      setWeek(data.week);
-      setBudget(data.budget);
-      setStaff(data.staff);
-      setTasks(data.tasks);
-      alert("Game progress loaded successfully!");
-    } catch (err) {
-      console.error("Failed to load game:", err);
-      alert("Error loading game.");
-    }
-  };
+    setWeek(prev => prev + 1);
 
-    
+    setTasks(prevTasks =>
+      prevTasks.map(task => {
+        if (task.assignedStaffId && task.progress < task.duration) {
+          const person = staff.find(s => s.id === task.assignedStaffId);
+          if (!person) return task;
+
+          let speed = 1 + 0.1 * person.level;
+          if (task.name.includes(person.profession)) {
+            speed *= 1.1;
+          }
+
+          const newProgress = task.progress + speed;
+          return {
+            ...task,
+            progress: Math.min(newProgress, task.duration)
+          };
+        }
+        return task;
+      })
+    );
+
+    const dailyCost = staff.reduce((sum, p) => sum + p.costPerDay, 0);
+    setBudget(prev => Math.max(0, prev - dailyCost));
+
+    setStaff(prev =>
+      prev.map(p => ({
+        ...p,
+        fatigue: Math.min(100, p.fatigue + 2),
+        morale: Math.max(0, p.morale - 1)
+      }))
+    );
+  }
+
   return (
     <GameContext.Provider
-        value={{
-          week, budget, staff, tasks, events,
-          assignStaffToTask, nextWeek,
-          saveGame, loadGame, simulateWeek
-        }}
+      value={{
+        week,
+        budget,
+        staff,
+        tasks,
+        assignStaffToTask,
+        simulateWeek,
+        handleRest
+      }}
     >
       {children}
     </GameContext.Provider>
