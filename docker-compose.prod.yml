@@ -3,7 +3,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile.prod
-    container_name: project-backend
+    container_name: backend
     restart: always
     env_file:
       - ./backend/.env
@@ -19,7 +19,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile.prod
       args:
-        VITE_API_URL: "/api"
+        VITE_API_URL: http://localhost/api
     container_name: project-frontend
     restart: always
     ports:

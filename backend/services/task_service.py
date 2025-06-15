@@ -1,32 +1,36 @@
 from models.task import Task
-from extensions import db
 from models.project import Project
-def create_task(name, base_duration, base_cost, project_id, start_week):
-    project = Project.query.get(project_id)
-    if project.budget_spent + base_cost > project.budget:
-        abort(400, message="Budget limit exceeded")
+from models.assignment import Assignment
+from extensions import db
+from flask_smorest import abort
 
-    task = Task(
-        name=name,
-        base_duration=base_duration,
-        base_cost=base_cost,
-        project_id=project_id,
-        start_week=start_week
-    )
-    db.session.add(task)
+def simulate_week(user_id):
+    projects = Project.query.filter_by(user_id=user_id).all()
+    if not projects:
+        abort(404, message="User has no projects")
+
+    for project in projects:
+        tasks = Task.query.filter_by(project_id=project.id).filter(Task.status != "Completed").all()
+
+        for task in tasks:
+            assignments = Assignment.query.filter_by(task_id=task.id).all()
+            if not assignments:
+                continue  # никто не назначен — задача не двигается
+
+            total_speed = sum([a.staff.speed for a in assignments if a.staff])
+
+            if task.difficulty > 0:
+                progress_gain = (total_speed / task.difficulty) * 10
+            else:
+                progress_gain = total_speed * 10
+
+            task.progress += progress_gain
+
+            if task.progress >= 100:
+                task.progress = 100
+                task.status = "Completed"
+
+        project.current_week += 1
+
     db.session.commit()
-    return {"message": "Task created successfully"}, 201
-
-def get_all_tasks():
-    tasks = Task.query.all()
-    return [
-        {
-            "id": t.id,
-            "name": t.name,
-            "base_duration": t.base_duration,
-            "base_cost": t.base_cost,
-            "project_id": t.project_id,
-            "start_week": t.start_week
-        }
-        for t in tasks
-    ]
+    return {"message": "Неделя симулирована успешно"}, 200

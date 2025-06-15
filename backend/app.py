@@ -2,6 +2,7 @@ from flask import Flask
 from flask_smorest import Api
 from config import Config
 from extensions import db, jwt
+from models import gamesave
 from flask_migrate import Migrate
 from routes.auth_routes import blp as AuthBlueprint
 from routes.project_routes import blp as ProjectBlueprint
@@ -13,6 +14,7 @@ from routes.event_routes import blp as EventBlueprint
 from routes.admin_task_routes import blp as AdminTaskBlueprint
 from utils.error_handlers import register_error_handlers  # если есть кастомные обработчики ошибок
 from flask_cors import CORS
+from routes.save import blp as SaveBlueprint
 
 def create_app():
     app = Flask(__name__)
@@ -57,6 +59,7 @@ def create_app():
     api.register_blueprint(TokenBlueprint)
     api.register_blueprint(EventBlueprint)
     api.register_blueprint(AdminTaskBlueprint)
+    api.register_blueprint(SaveBlueprint)
 
     # ✅ Настройка JWT Identity
     @jwt.user_identity_loader

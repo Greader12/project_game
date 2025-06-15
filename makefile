@@ -10,6 +10,10 @@ up:
 down:
 	$(COMPOSE) down
 
+# Пересобрать контейнеры с нуля (без кэша)
+build:
+	$(COMPOSE) build --no-cache
+
 # Посмотреть логи всех контейнеров
 logs:
 	$(COMPOSE) logs -f
@@ -34,3 +38,23 @@ bash-backend:
 # Выполнить bash внутри frontend
 bash-frontend:
 	docker exec -it $$(docker ps -qf "name=frontend") sh
+# reset db
+reset-db:
+	docker-compose -f docker-compose.prod.yml down -v
+	docker-compose -f docker-compose.prod.yml up --build -d
+	docker-compose -f docker-compose.prod.yml exec backend flask db upgrade
+
+# Backend: Alembic commands
+init-db:
+	docker-compose -f docker-compose.prod.yml exec backend flask db init
+
+migrate-db:
+	docker-compose -f docker-compose.prod.yml exec backend flask db migrate -m "initial migration"
+
+upgrade-db:
+	docker-compose -f docker-compose.prod.yml exec backend flask db upgrade
+
+reset-db:
+	docker-compose -f docker-compose.prod.yml exec backend flask db downgrade base
+	docker-compose -f docker-compose.prod.yml exec backend flask db upgrade
+

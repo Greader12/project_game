@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { login } from "../api/auth";
+import { useTranslation } from "react-i18next";
 
 function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -14,27 +16,27 @@ function LoginPage() {
       navigate("/dashboard");
     } catch (error) {
       console.error('Login failed:', error);
-      alert('Login failed. Please check your credentials.');
+      alert(t("loginError"));
     }
   };
 
   return (
     <div>
-      <h2>Login</h2>
+      <h2>{t("login")}</h2>
       <form onSubmit={handleSubmit}>
         <input
           type="text"
-          placeholder="Username"
+          placeholder={t("username")}
           value={username}
           onChange={(e) => setUsername(e.target.value)}
         /><br />
         <input
           type="password"
-          placeholder="Password"
+          placeholder={t("password")}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         /><br />
-        <button type="submit">Login</button>
+        <button type="submit">{t("login")}</button>
       </form>
     </div>
   );

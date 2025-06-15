@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import axios from "../api/axios"; // ✅ правильно
-import Modal from './Modal'; // Подключение модалки
+import axios from "../../api/axios"; // Подключи твой axios файл
+import Modal from "../layout/Modal"; // Подключение модалки
 import './StaffPanel.css'; // Стили для карточек
 
 const StaffPanel = () => {
@@ -39,8 +39,7 @@ const StaffPanel = () => {
   };
 
   return (
-    <div className="staff-panel">
-      <h2>Сотрудники</h2>
+
       <div className="staff-grid">
         {staffList.map(staff => (
           <div key={staff.id} className="staff-card">
@@ -58,7 +57,6 @@ const StaffPanel = () => {
             <button onClick={() => handleCompleteTask(staff.id)}>Выполнить задачу</button>
           </div>
         ))}
-      </div>
 
       {showModal && selectedStaff && (
         <Modal open={true} onClose={() => setShowModal(false)}>

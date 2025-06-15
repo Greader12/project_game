@@ -1,43 +1,38 @@
 import React, { useState } from "react";
-import GameController from "../components/GameController";
-import StaffPanel from "../components/StaffPanel";
-import ProjectProgress from "../components/ProjectProgress";
-import EventModal from "../components/EventModal";
-import ProjectInfoPanel from "../components/ProjectInfoPanel";
+import GameController from "../components/game/GameController";
+import ProjectProgress from "../components/tasks/ProjectProgress";
+import StaffPanel from "../components/game/StaffPanel";
+import GameSavePanel from "../components/layout/GameSavePanel";
+import ResourcePanel from "../components/layout/ResourcePanel";
+
+import Modal from "../components/layout/Modal"; // ✅ заменили EventModal
+import { useTranslation } from "react-i18next";
+import { useGame } from "../context/GameContext";
 
 function DashboardPage() {
-  const [showEvent, setShowEvent] = useState(false);
   const [eventData, setEventData] = useState(null);
-  const [week, setWeek] = useState(1);
-  const [budget, setBudget] = useState(5000); // стартовый бюджет
-
+  const { t } = useTranslation();
+  const { simulateWeek } = useGame();
 
   const handleTriggerEvent = (event) => {
     setEventData(event);
-    setShowEvent(true);
   };
 
   return (
     <div className="main-wrapper">
-      <h2>🎯 Project Dashboard</h2>
+      <h2 className="text-xl font-bold mb-4">🎯 {t("dashboardTitle")}</h2>
 
-      {/* Компонент управления симуляцией (недели, события и т.д.) */}
+      <GameSavePanel />
+      <ResourcePanel />
+
       <GameController onTriggerEvent={handleTriggerEvent} />
-
-      {/* Панель сотрудников */}
-      <h3>Your Staff</h3>
       <StaffPanel />
-
-      {/* Прогресс проекта (задачи) */}
-      <h3>Project Progress</h3>
       <ProjectProgress />
 
-      {/* События */}
-      {showEvent && (
-        <EventModal
-          event={eventData}
-          onClose={() => setShowEvent(false)}
-        />
+      {eventData && (
+        <Modal onClose={() => setEventData(null)}>
+          <p>📣 Событие: <strong>{eventData.type}</strong></p>
+        </Modal>
       )}
     </div>
   );
